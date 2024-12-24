@@ -10,7 +10,7 @@ def html_text_extractor(path):
             html_content = file.read()
         text = trafilatura.extract(html_content)
         if text is None:
-            print(f"Aucun texte pertinent n'a été extrait du fichier {file_path}.")
+            print(f"Aucun texte pertinent n'a été extrait du fichier {path}.")
             return ""
         return text
         
