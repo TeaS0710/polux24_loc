@@ -2,6 +2,9 @@ import spacy
 from spacy import displacy
 import json
 
+#python -m spacy download fr_dep_news_trf
+#python -m spacy download fr_core_news_lg
+
 Modele_version = "trf"
 if Modele_version == "lg_Efficiency":
     Modele = "fr_core_news_lg"
