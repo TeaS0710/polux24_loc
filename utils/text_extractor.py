@@ -5,7 +5,7 @@ import glob
 import trafilatura
 from PyPDF2 import PdfReader
 
-def __html_text_extractor(path):
+def html_text_extractor(path):
     try:
         with open(path, 'r', encoding='utf-8') as file:
             html_content = file.read()
@@ -15,7 +15,7 @@ def __html_text_extractor(path):
             return ""
         return text
         
-def __pdf_text_extractor(path):
+def pdf_text_extractor(path):
     try:
         reader = PdfReader(path)
         text = ""
