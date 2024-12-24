@@ -3,7 +3,6 @@ from PyPDF2 import PdfReader
 from os.path import splitext
 import glob
 import trafilatura
-from PyPDF2 import PdfReader
 
 def html_text_extractor(path):
     try:
