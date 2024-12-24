@@ -1,29 +1,19 @@
 from trafilatura import extract
 from PyPDF2 import PdfReader
 from os.path import splitext
-import glob
-import trafilatura
 
 def html_text_extractor(path):
-    try:
-        with open(path, 'r', encoding='utf-8') as file:
-            html_content = file.read()
-        text = trafilatura.extract(html_content)
-        if text is None:
-            print(f"Aucun texte pertinent n'a été extrait du fichier {path}.")
-            return ""
-        return text
+    with open(path, "r", encoding="utf-8") as file:
+        text = extract(file.read())
+        
+    return text if text else ""
+
         
 def pdf_text_extractor(path):
-    try:
-        reader = PdfReader(path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
-        if text is None:
-            print(f"Aucun texte pertinent n'a été extrait du fichier {path}.")
-            return ""
-        return text
+    text = [page.extract_text().stip() for page in PdfReader(path).pages]
+    final_text = "\n".join(text).strip()
+    
+    return final_text if final_text else ""
 
 class TextExtractor:
   extractors = {
