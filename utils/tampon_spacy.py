@@ -3,11 +3,11 @@ from spacy import displacy
 import json
 
 Modele_version = "trf"
-if Modele_version == "sm":
-    Modele = "fr_core_news_sm"
-elif Modele_version == "lg":
+if Modele_version == "lg":
     Modele = "fr_core_news_lg"
-elif Modele_version == "trf":
+elif Modele_version == "trf_E":
+    Modele = "fr_dep_news_trf"
+elif Modele_version == "trf_P"
     Modele = "fr_dep_news_trf"
 
 def read_text(path_txt):
