@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from base import DataWrapper
+from text_extractor import get_text
 
 @dataclass(frozen=True, slots=True)
 class Document(DataWrapper):
