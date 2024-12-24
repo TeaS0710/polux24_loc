@@ -1,4 +1,5 @@
 import stanza
+import json
 
 stanza.download('fr')
 nlp = stanza.Pipeline('fr', processors='tokenize,ner')
