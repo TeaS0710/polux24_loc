@@ -14,10 +14,7 @@ def __html_text_extractor(path):
             print(f"Aucun texte pertinent n'a été extrait du fichier {file_path}.")
             return ""
         return text
-    except Exception as e:
-        print(f"Erreur lors de l'extraction du fichier HTML {file_path}: {e}")
-        return ""
-
+        
 def __pdf_text_extractor(path):
     try:
         reader = PdfReader(path)
@@ -28,10 +25,6 @@ def __pdf_text_extractor(path):
             print(f"Aucun texte pertinent n'a été extrait du fichier {path}.")
             return ""
         return text
-    except Exception as e:
-        print(f"Erreur lors de l'extraction du fichier HTML {path}: {e}")
-        return ""
-
 
 class TextExtractor:
   extractors = {
