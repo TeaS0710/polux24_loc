@@ -2,18 +2,18 @@ from trafilatura import extract
 from PyPDF2 import PdfReader
 from os.path import splitext
 
-def html_text_extractor(path):
+def __html_text_extractor(path):
   pass
 
 
-def pdf_text_extractor(path):
+def __pdf_text_extractor(path):
   pass
 
 
 class TextExtractor:
   extractors = {
-    ".html": html_text_extractor,
-    ".pdf": pdf_text_extractor
+    ".html": __html_text_extractor,
+    ".pdf": __pdf_text_extractor
   }
 
   @staticmethod
