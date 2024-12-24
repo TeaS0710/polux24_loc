@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import ClassVar
 import msgpack
 
-from .text_extractor import get_text
+from utils.TextExtractor import get_text, extractors
 
 
 class DataWrapper:
@@ -18,6 +19,8 @@ class DataWrapper:
 
 @dataclass(frozen=True, slots=True)
 class Document(DataWrapper):
+  supported_exts: ClassVar[set] = set(extractors.keys())
+  
   author: str
   group: str
   text: str
@@ -33,7 +36,7 @@ class Document(DataWrapper):
     )
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class LocEntity(DataWrapper):
   document: str
   end: int
