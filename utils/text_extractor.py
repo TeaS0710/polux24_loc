@@ -2,14 +2,14 @@ from trafilatura import extract
 from PyPDF2 import PdfReader
 from os.path import splitext
 
-def html_text_extractor(path):
+def __html_text_extractor(path):
     with open(path, "r", encoding="utf-8") as file:
         text = extract(file.read())
         
     return text if text else ""
 
         
-def pdf_text_extractor(path):
+def __pdf_text_extractor(path):
     text = [page.extract_text().stip() for page in PdfReader(path).pages]
     final_text = "\n".join(text).strip()
     
