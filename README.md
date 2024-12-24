@@ -1,2 +1,2 @@
 # polux24_loc
-2024 (NER in polux)
+Moteur de recherche d'entités nommées de lieu dans _polux24_.
