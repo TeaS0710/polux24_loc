@@ -1,6 +1,7 @@
-from trafilatura import extract
-from PyPDF2 import PdfReader
 from os.path import splitext
+from PyPDF2 import PdfReader
+from trafilatura import extract
+
 
 def __html_text_extractor(path):
     with open(path, "r", encoding="utf-8") as file:
@@ -14,6 +15,7 @@ def __pdf_text_extractor(path):
     final_text = "\n".join(text).strip()
     
     return final_text if final_text else ""
+
 
 class TextExtractor:
   extractors = {
