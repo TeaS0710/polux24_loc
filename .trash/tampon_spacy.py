@@ -11,36 +11,25 @@ if Modele_version == "lg_Efficiency":
 elif Modele_version == "trf_Precision":
     Modele = "fr_dep_news_trf"
 
-def read_text(path_txt):
-    with open(path_txt, mode='r', encoding='utf-8') as f:
-        return f.read()
-
-def extract_locations_to_json(text, model_lang, author):
+def extract_locations(txt, model_lang, key):
     nlp = spacy.load(model_lang)
-    nlp.max_length = 1000
-    doc = nlp(text)
+    doc = nlp(txt)
 
-    locations = {
-        f"localisation {i}": {
-            "Entité": ent.text,
-            "Label": ent.label_
-        }
-        for i, ent in enumerate(doc.ents) if ent.label_ == "LOC"
-    }
+    locentities = []
 
-    output_file = f"{author}_{model_lang}_locations.json"
-    
-    with open(output_file, mode='w', encoding='utf-8') as f:
-        json.dump(locations, f, indent=4)
-    print(f"Fichier JSON généré : {output_file}")
-    return output_file, author, model_lang, locations
+    for ent in doc.ents:
+        if ent.type == "LOC":
+            yield LocEntity(
+                document= key,
+                start= ent.start_char,
+                end= ent.end_char,
+                motor="stanza",
+                text= ent.text
+            )
+    return locentities
 
 def main():
-    for path in paths:
-        author = path.split("\\")[-3]
-        text = read_text(path)
-        print(f"Traitement : {path}")
-        output_file = extract_locations_to_json(text, Modele, author)
-        print(f"Nombre de localisations extraites dans {output_file}: {location_count}")
-
-main()
+    locations = extract_locations(key, txt)
+    print(locations)
+    
+    main()
