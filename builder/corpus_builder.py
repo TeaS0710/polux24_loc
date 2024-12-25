@@ -1,10 +1,12 @@
 import json
 import lmdb
+import sys
 
 from hashlib import md5
 from os.path import splitext, exists
 
-from utils import Document
+from utils import Document, new_logger
+from env import PATH, VARS
 
 
 def compute_md5(utf8_str):
@@ -95,3 +97,20 @@ def built(env, hash_table, logger):
         add_documents(txn, cleaned_hash_table, logger)
 
     logger.info(f"Function 'built' completed.")
+
+
+def main():
+    logger = new_logger(__file__, PATH.CACHE)
+
+    with open(PATH.HASH_TABLE, "r", encoding="utf-8") as file:
+        hash_table = json.load(file)
+
+    with lmdb.open(PATH.CORPUS_PATH, map_size=VARS.MAP_SIZE) as env:
+        built(env, hash_table, logger)
+
+    return 0
+
+
+if __name__ == "__main__":
+    exit_code = main()
+    sys.exit(exit_code)
