@@ -20,11 +20,7 @@ Contient les données brutes (sous `source/`), et les BDD (sous `corpus/`).
 ### `.cache`
 Contient des fichiers temporaires, notamment les .log générés par les scripts.
 
-## Auteur·ice·s
-`TeaS0710` et `Rber085`
-
-Projet de fin de semestre en _Programmation de modèles linguistiques I_ (`carolinekoudoroparfait`).
-
-Sobonne Université, Licence Sciences du langage, 3e année.
+***
+By [Camille Monnot](https://github.com/Rber085) & [Adrien Vergne](https://github.com/TeaS0710), _dir_. [Caroline Koudouro-Parfait](https://github.com/carolinekoudoroparfait).
 
 2024, MIT Licence.
