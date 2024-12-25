@@ -1,9 +1,9 @@
 import stanza
 
-stanza.download('fr')
-nlp = stanza.Pipeline('fr', processors='tokenize,ner')
-
 def extract_locations(key, txt):
+
+    stanza.download('fr')
+    nlp = stanza.Pipeline('fr', processors='tokenize,ner')
 
     doc = nlp(txt)
     locentities = []
