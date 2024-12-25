@@ -23,7 +23,7 @@ def extract_locations(txt, model_lang, key):
                 document= key,
                 start= ent.start_char,
                 end= ent.end_char,
-                motor="stanza",
+                motor=f"{model_lang}",
                 text= ent.text
             )
     return locentities
