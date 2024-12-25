@@ -1,4 +1,6 @@
+import json
 import lmdb
+
 from hashlib import md5
 from os.path import splitext, exists
 
@@ -49,7 +51,7 @@ def clean_table(hash_table, logger):
 
 
 def add_documents(txn, hash_table, logger):
-    logger.warning("Function 'built' called.")
+    logger.warning("Function 'add_documents' called.")
     
     added_docs = 0
     total = 0
@@ -76,12 +78,20 @@ def add_documents(txn, hash_table, logger):
         finally:
             total += 1
 
-    logger.warning(f"Function 'built' completed: {added_docs}/{total} document(s) successfully added to the database.")
+    logger.warning(f"Done: {added_docs}/{total} document(s) successfully added to the database.")
+    logger.info(f"Function 'add_documents' completed.")
 
 
-def built(db_path, hash_table_path, logger):
-    pass
-    # Implémenter:
-    # Ouvre hash_table_path
-    # Ouvre l'env, polux24 et initie la transaction
-    # appelle add_documents
+def built(env, hash_table, logger):
+    logger.info(f"Function 'built' called.")
+    
+    cleaned_hash_table = clean_table(raw_hash_table, logger)
+
+    polux24 = env.open_db(b"polux24")
+    logger.debug(f"Database 'polux24' opened.")
+    
+    with env.open(write=True, db=polux24) as txn:
+        logger.debug(f"New transaction to 'polux24' initialized.")
+        add_documents(txn, cleaned_hash_table, logger)
+
+    logger.info(f"Function 'built' completed.")
