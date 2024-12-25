@@ -6,7 +6,7 @@ from hashlib import md5
 from os.path import splitext, exists
 
 from utils import Document, new_logger
-from env import PATH, VARS
+from env import PATH, ENVIRON_VARS
 
 
 def compute_md5(utf8_str):
@@ -100,12 +100,12 @@ def built(env, hash_table, logger):
 
 
 def main():
-    logger = new_logger(__file__, PATH.CACHE)
+    logger = new_logger(__file__, PATH.CACHE, verbose=True)
 
     with open(PATH.HASH_TABLE, "r", encoding="utf-8") as file:
         hash_table = json.load(file)
 
-    with lmdb.open(PATH.CORPUS_PATH, map_size=VARS.MAP_SIZE) as env:
+    with lmdb.open(PATH.CORPUS, map_size=ENVIRON_VARS.CORPUS_MAP_SIZE) as env:
         built(env, hash_table, logger)
 
     return 0
