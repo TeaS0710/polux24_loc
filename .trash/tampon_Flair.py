@@ -18,7 +18,7 @@ def extract_locations_to_json(key, txt):
                 start= ent.start_char,
                 end= ent.end_char,
                 motor=f"{model_lang}",
-                txt= ent.text
+                text= ent.text
             )
     return locentities
 
