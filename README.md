@@ -2,7 +2,7 @@
 Named entity recognition on the french corpus _POLUX_ (_Politiques X Universités_).
 
 ## Documentation
-Please read full [documentation](docs/documentation.md).
+Please read [full documentation](docs/documentation.md).
 
 You can run [this script](docs/generate_doc.py) to update documentation from the source code:
 ```bash
