@@ -1,4 +1,4 @@
-# POLUX LOC
+# Project overview
 Named entity recognition on the french corpus _POLUX_ (_Politiques X Universités_).
 
 ## Documentation
