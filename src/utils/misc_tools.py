@@ -1,7 +1,27 @@
-import logging             # Used by `create_logger` to implement logging mechanisms
+import logging                                 # Used by `create_logger` to implement logging mechanisms
 
-from hashlib import sha256 # Used by `hash_file` and `hash_str` to compute SHA-256
-from uuid import uuid4     # Used by `generate_uuid` to obtain a random unique identifier
+from hashlib import sha256                     # Used by `hash_file` and `hash_str` to compute SHA-256
+from os.path import basename, exists, splitext # Used by `split_path` to split stem and extension of a file path
+from uuid import uuid4                         # Used by `generate_uuid` to obtain a random unique identifier
+
+
+def split_path(path):
+    """
+    Splits the given file path into its stem and its extension.
+    
+    Related objects:
+    - :mod: `os.path`
+    - :func: `os.path.splitext`
+    - :func: `os.path.basename`
+    
+    :param path: The file path to split.
+    :returns: A tuple containing the base name and extension.
+    
+    :type path: str
+    :rtype: Tuple[str, str]
+    """
+    
+    return splitext(basename(path))
 
 
 def generate_uuid():
