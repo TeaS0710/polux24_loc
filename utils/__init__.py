@@ -1,5 +1,12 @@
-from .document import Document
-from .loc_entity import LocEntity
-from .new_logger import new_logger
+from .misc_tools import generate_uuid, hash_file, hash_str, create_logger
+from .text_extractor import get_text
+from .loc_extractor import get_locs
 
-__all__ = ["Document", "LocEntity", "new_logger"]
+__all__ = [
+  "generate_uuid",
+  "hash_file",
+  "hash_str",
+  "create_logger",
+  "get_text",
+  "get_locs"
+]
