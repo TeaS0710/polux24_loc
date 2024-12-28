@@ -7,6 +7,10 @@ import stanza
 import flair
 from flair.data import Sentence
 from flair.models import SequenceTagger
+import spacy
+from spacy import displacy
+import json
+
 
 tagger = SequenceTagger.load('ner')
 
@@ -58,10 +62,6 @@ def main():
     print(locations)
     
     main()
-
-import spacy
-from spacy import displacy
-import json
 
 #python -m spacy download fr_dep_news_trf
 #python -m spacy download fr_core_news_lg
