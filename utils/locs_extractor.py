@@ -1,6 +1,5 @@
 from spacy import load as spacy_load
 from stanza import Pipeline as stanza_load
-
 from flair.data import Sentence
 from flair.models.SequenceTagger import flair_load
 
