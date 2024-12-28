@@ -1,7 +1,7 @@
 from PyPDF2 import PdfReader
 from trafilatura import extract
 
-from misc_tools import split_path, exists
+from .misc_tools import split_path, exists
 
 
 def __html_text_extractor(path):
