@@ -7,7 +7,7 @@ Please read [full documentation](doc/documentation.md).
 You can run [this script](doc/generate_doc.py) to update documentation from the source code:
 ```bash
 user% cd polux24_loc
-user% python3 docs/generate_doc.py
+user% python3 doc/generate_doc.py
 ```
 
 ## Credits
