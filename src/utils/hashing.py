@@ -1,6 +1,23 @@
 from hashlib import sha256
 
 
+def generate_uuid():
+    """
+    Generates a random unique identifier as a string.
+    
+    Related objects:
+    - :mod: `uuid`
+    - :func: `uuid.uuid4`
+    
+    :returns: The random unique identifier as a string.
+    :rtype: str
+    """
+    
+    # Calls `uuid4` from the `uuid` library to obtain a random unique identifier
+    # Returns the string representation of it
+    return str(uuid4())
+
+
 def hash_file(path, chunk_size=8192):
     """
     Computes the hash of a file.
