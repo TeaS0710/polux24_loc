@@ -1,8 +1,9 @@
 from io import BytesIO, StringIO
-import logging
 import os
 import pandas
 import shutil
+
+from .misc import hash_data, hash_file
 
 
 class FileManager:
