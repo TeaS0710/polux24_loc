@@ -6,15 +6,15 @@ import shutil
 
 
 class FileManager:
-    def __new__(cls, path, mode, logger, scheme=None, hash_func=hash_sha256):
+    def __new__(cls, path, mode, scheme, logger):
         if mode == "r":
-            return FileManagerReader(path, logger, scheme=scheme, hash_func=hash_func)
+            return FileManagerReader(path, scheme, logger)
             
         elif mode == "w":
-            return FileManagerWriter(path, logger, scheme=scheme, hash_func=hash_func, overwrite=False)
+            return FileManagerWriter(path, scheme, logger, overwrite=False)
             
         elif mode == "w+":
-            return FileManagerWriter(path, logger, scheme=scheme, hash_func=hash_func, overwrite = True)
+            return FileManagerWriter(path, scheme, logger, overwrite=True)
             
         else:
             logger.critical()
@@ -26,96 +26,92 @@ class FileManager:
     def abspath(self, file_hash):
         return os.path.abspath(os.path.join(self.path, "files", file_hash))
 
-    def match_scheme(self, dictionary):
-        if self.scheme is None:
-            return True
-
-        dictionary_keys = set(dictionary)
-        scheme_keys = set(self.scheme)
-
-        common_keys = dictionary_keys & scheme_keys
-
-        missing_keys = scheme_keys - common_keys
-        extra_keys = dictionary_keys - common_keys
-        invalid_vals = {key for key in common_keys if not self.scheme[key](dictionary[key])}
-
-        rbool = True
-        
-        if missing_keys:
-            self.logger.error()
-            rbool = False
-            
-        if extra_keys:
-            self.logger.error()
-            rbool = False
-            
-        if invalid_vals:
-            self.logger.error()
-            rbool = False
-            
-        return rbool
-
 
 class FileManagerReader(FileManager):        
-    def __init__(self, path, logger, scheme=None, hash_func=hash_sha256):
+    def __init__(self, path, scheme, logger):
+        logger.debug()
         if not os.path.exists(path):
             logger.critical()
             raise FileNotFoundError()
 
-        hashes_table_path = os.path.join(path, "hashes_table.csv")
+        table_path = os.path.join(path, "table.csv")
         files_path = os.path.join(path, "files")
-        
+
+        logger.debug()
         if not os.path.exists(hashes_table_path):
             logger.critical()
             raise FileNotFoundError()
 
+        logger.debug()
         if not os.path.exists(files_path):
             logger.critical()
             raise FileNotFoundError()
 
+        # Vérifie que scheme est de la forme {str: callable Any vers bool}
+        
         try:
-            dataframe = pandas.read_csv(csv_path)
             logger.debug()
+            dataframe = pandas.read_csv(csv_path)
             
         except Exception as exception:
             logger.critical()
             raise exception
 
-        logger.info()
+        # Vérifie une correspondance exacte scheme/colone
+        
+        logger.debug()
 
-        self.path = path
+        self.root_path = root_path
+        self.table_path = table_path
+        self.files_path = files_path
+        
         self.table = dataframe
+        self.invalid = set()
         
     def __post_init__(self):
-        wrong_files = self.check()
+        # Vérifie la validité des données dans le df
+        all_hashes = set(self.table.index)
+        table_bool = pandas.DataFrame({
+            col: self.table[col].apply(function)
+            for col, function in scheme.items()
+        })
+        invalid_hashes = table_bool[~table_bool.all(axis=1)].index
 
-        if self.wrong_files:
-            logger.warning()
-            self.pop(wrong_files)
-    
+        # Verifie la validité des fichiers et récupère l'ensemble des fichiers
+        all_files = set()
+        invalid_files = set()
+        for entry in os.scandir(self.files_path):
+            all_files.add(entry.name)
+            if entry.name != hash_file(entry.path):
+                invalid_files.add(entry.name)
+
+        # Identifie les mismatch entre table et fichiers
+        extra_hashes = all_hashes - all_files
+        missing_hashes = all_files - all_hashes
+
+        # Logs les hashes concernés et nettoie la table des hashes
+        if invalid_hashes:
+            self.logger.error()
+            self.table.drop(invalid_hashes, inplace=True)
+            self.invalid |= invalid_hashes
+
+        if invalid_files:
+            self.logger.error()
+            self.table.drop(invalid_files, errors="ignore", inplace=True)
+            self.invalid |= invalid_files
+
+        if extra_hashes:
+            self.logger.error()
+            self.table.drop(extra_hashes, inplace=True)
+            self.invalid |= extra_hashes
+
+        if missing_hashes:
+            self.logger.error()
+            self.invalid |= missing_hashes
+
     def __iter__(self):
         for file_hash, file_metadata in self.table:
             yield file_hash, file_metadata.to_dict()
-
-    def check(self):
-        wrong_keys = set()
-
-        for file_hash, file_metadata in self:
-            if not self.match_scheme(file_metadata):
-                wrong_keys.add(file_hash)
-
-        for file_path in glob.iglob()
-            file_name = os.path.basename(file_path)
-
-            if file_name != self.hash_func(file_path):
-                self.logger.error()
-                wrong_keys.add(file_hash)
-
-        # Vérifie qu'il y a match entre les entrées
-        # Retourne l'ensemble des hashes problemmatique
-
-    def pop(self, index_to_drop):
-        self.table.drop(index_to_drop)
     
     def open(self, file_hash, binary=False, encoding="utf-8", newline=None, buffering=1):
         file_path = self.abspath(file_hash)
@@ -136,8 +132,8 @@ class FileManagerReader(FileManager):
             return BytesIO() if binary else StringIO()
 
 
-class FileManagerWriter(FileManager):        
-    def __init__(self, path, logger, scheme=None, hash_func=hash_sha256, overwrite = False):
+class FileManagerWriter(FileManager):
+    def __init__(self, path, logger, scheme=None, overwrite = False):
         if os.path.exists(path):
             if overwrite:
                 logger.warning()
@@ -157,7 +153,7 @@ class FileManagerWriter(FileManager):
 
     def __exit__(self):
         self.logger.info()
-        self.table.to_csv(os.path.join(self.path, "hashes_table.csv"))
+        self.table.to_csv(self.table_path)
     
     def write(content, metadata, binary=False, encoding="utf-8", newline=None, buffering=-1):
         file_hash = hash_sha256(content, binary=binary, encoding=encoding)
@@ -166,8 +162,7 @@ class FileManagerWriter(FileManager):
             logger.error()
             return False
 
-        if self.check_meta(metadata):
-            self.table.loc[file_hash] = metadata
+        ...
 
         else:
             return False
@@ -186,67 +181,3 @@ class FileManagerWriter(FileManager):
         except Exception as exception:
             self.logger.error()
             return False
-
-
-def create_logger(name, path, verbose=False, level=logging.INFO):
-    """
-    Creates and configures a logger.
-    
-    Creates a logger and sets its minimum degree of severity to `level`.
-    Adds a handler to `path`, and if `verbose` is True, a console handler.
-    Logs an INFO message throught the logger, displaying its name and the path of the current Python script.
-    Returns the configured logger.
-
-    Related objects:
-    - :mod: `logging`
-    - :func: `logging.getLogger`
-    - :class: `logging.Logger`
-    - :class: `logging.Formatter`
-    - :class: `logging.FileHandler`
-    - :class: `logging.StreamHandler`
-
-    :param name: Unique identifier for the logger object, used to distinguish it from others.
-    :param path: Path to write the log file.
-    :param verbose: Boolean flag to control the addition of a second handler for console output.
-    :param level: Minimal severity level of log entries.
-    :returns: Configured logger instance.
-    
-    :type name: str
-    :type path: str
-    :type verbose: bool
-    :type level: int
-    :rtype: logging.Logger
-    
-    :default verbose: False
-    :default level: logging.INFO
-    """
-    
-    # Creates a logger instance with the specified name and log level
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-
-    # Creates a formatter for log entries
-    formatter = logging.Formatter("%(asctime)s.%(msecs)03d -- %(name)s -- %(levelname)-8s %(message)s", "%Y-%m-%d %H:%M:%S")
-
-    # Creates a file handler to `path` and applies `formatter` to it
-    file_handler = logging.FileHandler(path)
-    file_handler.setFormatter(formatter)
-    
-    # Adds it to the logger
-    logger.addHandler(file_handler)
-
-    # If `verbose` is True, adds a second handler to display log entries in console
-    if verbose:
-        
-        # Creates a stream handler to stdout and applies `formatter` to it
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        
-        # Adds it to the logger
-        logger.addHandler(console_handler)
-
-    # Logs an initial info-level message with the logger's name and the Python script path
-    logger.info(f"Logger '{name}' initialized for logging the execution of script '{__file__}'")
-
-    # Returns the configured logger instance
-    return logger
