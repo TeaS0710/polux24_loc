@@ -169,6 +169,8 @@ class FileManagerWriter(FileManager):
         self.table = pandas.DataFrame()
         self.logger = logger
 
+        self.fields = set(scheme)
+
     def __exit__(self):
         self.logger.info()
         self.table.to_csv(self.table_path)
@@ -180,9 +182,15 @@ class FileManagerWriter(FileManager):
             logger.error()
             return False
 
+        metadata_keys = set(metadata)
+        common_keys = metadata_keys & self.fields
         
-
-        else:
+        missing_keys = self.fields - common_keys
+        extra_keys = metadata_keys - common_keys
+        invalid_vals = {key for key in common_keys if not self.scheme[key](metadata[key])}
+        
+        if missing_keys or extra_keys or invalid_vals:
+            self.logger.error()
             return False
         
         try:
