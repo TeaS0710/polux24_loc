@@ -1,10 +1,8 @@
 from PyPDF2 import PdfReader
 from trafilatura import extract
 
-from .misc_tools import split_path, exists
 
-
-def __html_text_extractor(path):
+def html_text_extractor(file):
     """
     Extracts text from an HTML file.
 
@@ -26,14 +24,11 @@ def __html_text_extractor(path):
     """
 
     # Open `path` in read mode as `file`, and pass file content (e.g., `file.read()`) to `trafilatura.extract`
-    with open(path, "r", encoding="utf-8") as file:
-        text = extract(file.read())
-
-    # Return `text` or an empty string if extraction fails
+    text = extract(file)
     return text if text else ""
 
         
-def __pdf_text_extractor(path):
+def pdf_text_extractor(file):
     """
     Extracts text from a PDF file.
 
@@ -56,7 +51,7 @@ def __pdf_text_extractor(path):
     """
 
     # List comprehension that iterates through each page of `path` and extracts their text
-    text_fragments = [page.extract_text().strip() for page in PdfReader(path).pages]
+    text_fragments = [page.extract_text().strip() for page in PdfReader(file).pages]
 
     # Build final `text` by concatenating `text_fragments`
     text = "\n".join(text_fragments).strip()
@@ -65,8 +60,70 @@ def __pdf_text_extractor(path):
     return text if text else ""
 
 
+
+"""
+def __html_text_extractor(path):
+    ""
+    Extracts text from an HTML file.
+
+    Retrieves HTML file content and calls :func:`trafilatura.extract` to extract text.
+
+    .. warning::
+       This function is meant for internal use and should not be called directly by the user.
+       Existence and file type checks are not performed, so errors may be raised.
+
+    Related objects:
+    - :mod:`trafilatura`
+    - :func:`trafilatura.extract`
+
+    :param path: Path of the HTML file.
+    :returns: Text extracted from the HTML file.
+
+    :type path: str
+    :rtype: str
+    ""
+
+    # Open `path` in read mode as `file`, and pass file content (e.g., `file.read()`) to `trafilatura.extract`
+    with open(path, "r", encoding="utf-8") as file:
+        te xt= extract(file.read())
+
+    # Return `text` or an empty string if extraction fails
+    return text if text else ""
+
+        
+def __pdf_text_extractor(path):
+    ""
+    Extracts text from a PDF file.
+
+    Uses :class:`PyPDF2.PdfReader` to iterate through PDF pages.
+    Retrieves text from each page with the :func:`extract_text` method.
+
+    .. warning::
+       This function is meant for internal use and should not be called directly by the user.
+       Existence and file type checks are not performed, so errors may be raised.
+
+    Related objects:
+    - :mod:`PyPDF2`
+    - :class:`PyPDF2.PdfReader`
+
+    :param path: Path of the PDF file.
+    :returns: Text extracted from the PDF file.
+
+    :type path: str
+    :rtype: str
+    ""
+
+    # List comprehension that iterates through each page of `path` and extracts their text
+    text_fragments = [page.extract_text().strip() for page in PdfReader(path).pages]
+
+    # Build final `text` by concatenating `text_fragments`
+    text = "\n".join(text_fragments).strip()
+
+    # Return `text` or an empty string if extraction fails
+    return text if text else ""
+
 def get_text(path, logger):
-    """
+    ""
     Extracts text from a file.
 
     Calls the appropriate extractor function based on the file extension.
@@ -88,7 +145,7 @@ def get_text(path, logger):
 
     :ivar extractors: A mapping of file extensions to their respective text extractor functions.
     :vartype extractors: Dict[str, Callable[[str], str]]
-    """
+    ""
 
     logger.debug("Function `get_text` called.")
 
@@ -133,3 +190,4 @@ def get_text(path, logger):
     ".html": __html_text_extractor,
     ".pdf": __pdf_text_extractor
 }
+"""
