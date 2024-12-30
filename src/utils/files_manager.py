@@ -5,16 +5,6 @@ import pandas
 
 
 class FileManager:
-    @staticmethod
-    def fake_stream(*args, **kwargs):
-        mode = open_kwargs.get("mode", open_args[0] if open_args else "r")
-
-        if "b" in mode:
-            return BytesIO(*args, **kwargs)
-
-        else:
-            return StringIO(*args, **kwargs)
-    
     @classmethod 
     def __new__(cls, path, mode, logger):
         if mode == "r":
@@ -80,34 +70,41 @@ class FileManager:
             """
             self.path = path
             self.table = table
-
-        """
-        Itère sur file_hash, file_meta in instance
-        """
         
         def __iter__(self):
-            pass
+            for file_hash, file_metadata in self.table:
+                yield file_hash, file_metadata.to_dict()
 
-        def __next__(self):
-            pass
-                      
-        def open(self, file_hash, encoding="utf-8", newline="\n", buffering=1):
+        def open(self, file_hash, binary=False, encoding="utf-8", newline="\n", buffering=1):
             if (file_path := self.abspath(file_hash)) is None:
                 logger.error()
-                return StringIO()
-
-            return open(file_path, "r", encoding=encoding, newline=newline, buffering=buffering)
-
-        def openb(self, file_hash, buffering=-1):
-            if (file_path := self.abspath(file_hash)) is None:
-                logger.error()
-                return BytesIO()
-
-            return open(file_path, "rb", buffering=buffering)
+                return BytesIO() if binary else StringIO()
+        
+            if binary:
+                return open(file_path, "rb", buffering=buffering)
+                
+            else:
+                return open(file_path, "r", encoding=encoding, newline=newline, buffering=buffering)
 
     class Writer(FileManager):
         def __init__(self, path, logger, overwrite = False):
-            pass
+            """
+            # Si not overwrite et path existe:
+			logger.critical()
+			raise PermissionError()
+			
+    		# Si overwrite et path existe:
+    			logger.warning()
+    			suppression du path
+		
+    		# Création
+    			creation de path
+    			creation du sous dir files/
+    			logger.info()
+            """
+            self.path = path
+            self.logger = logger
+            self.
 
         def write(self, content, data):
             pass
