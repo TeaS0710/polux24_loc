@@ -25,7 +25,7 @@ class FileManager:
         return file_hash in self.table.index
 
     def abspath(self, file_hash):
-        return os.path.abspath(os.path.join(self.path, "files", file_hash))
+        return os.path.abspath(os.path.join(self.files_path, file_hash))
 
 
 class FileManagerReader(FileManager):        
@@ -48,17 +48,32 @@ class FileManagerReader(FileManager):
             logger.critical()
             raise FileNotFoundError()
 
-        # Vérifie que scheme est de la forme {str: callable Any vers bool}
-        
         try:
             logger.debug()
-            dataframe = pandas.read_csv(csv_path)
+            dataframe = pandas.read_csv(csv_path, dtype=str)
             
         except Exception as exception:
             logger.critical()
             raise exception
 
-        # Vérifie une correspondance exacte scheme/colone
+        logger.debug()
+        
+        dataframe_cols = set(dataframe.columns)
+        scheme_cols = set(scheme.keys())
+        missing_cols = scheme_cols - dataframe_cols
+        extra_cols = dataframe_cols - scheme_cols
+
+        if missing_cols and extra_cols:
+            logger.critical()
+            raise KeyError()
+
+        elif missing_cols:
+            logger.critical()
+            raise KeyError()
+
+        elif extra_cols:
+            logger.critical()
+            raise KeyError()
         
         logger.debug()
 
@@ -67,7 +82,7 @@ class FileManagerReader(FileManager):
         self.files_path = files_path
         
         self.table = dataframe
-        self.invalid = set()
+        self.logger = logger
         
     def __post_init__(self):
         # Vérifie la validité des données dans le df
@@ -94,21 +109,17 @@ class FileManagerReader(FileManager):
         if invalid_hashes:
             self.logger.error()
             self.table.drop(invalid_hashes, inplace=True)
-            self.invalid |= invalid_hashes
 
         if invalid_files:
             self.logger.error()
             self.table.drop(invalid_files, errors="ignore", inplace=True)
-            self.invalid |= invalid_files
 
         if extra_hashes:
             self.logger.error()
             self.table.drop(extra_hashes, inplace=True)
-            self.invalid |= extra_hashes
 
         if missing_hashes:
             self.logger.error()
-            self.invalid |= missing_hashes
 
     def __iter__(self):
         for file_hash, file_metadata in self.table:
@@ -134,7 +145,7 @@ class FileManagerReader(FileManager):
 
 
 class FileManagerWriter(FileManager):
-    def __init__(self, path, logger, scheme=None, overwrite = False):
+    def __init__(self, path, logger, scheme, overwrite = False):
         if os.path.exists(path):
             if overwrite:
                 logger.warning()
@@ -144,11 +155,17 @@ class FileManagerWriter(FileManager):
                 logger.critical()
                 raise PermissionError()
 
+        files_path = os.path.join(path, "files")
+        table_path = os.path.join(path, "table.csv")
+        
         os.makedirs(path)
-        os.makedirs(os.path.join(path, "files"))
+        os.makedirs(files_path)
         logger.info()
     
-        self.path = path
+        self.root_path = root_path
+        self.table_path = table_path
+        self.files_path = files_path
+        
         self.table = pandas.DataFrame()
         self.logger = logger
 
@@ -163,7 +180,7 @@ class FileManagerWriter(FileManager):
             logger.error()
             return False
 
-        ...
+        
 
         else:
             return False
