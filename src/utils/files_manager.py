@@ -7,88 +7,100 @@ import shutil
 
 class FileManager:
     @classmethod 
-    def __new__(cls, path, mode, logger):
+    def __new__(cls, path, mode, logger, scheme=None, hash_func=hash_sha256):
         if mode == "r":
-            return cls.Reader(path, logger)
+            return cls.Reader(path, logger, scheme=scheme, hash_func=hash_func)
             
         elif mode == "w":
-            return cls.Writer(path, logger, overwrite=False)
+            return cls.Writer(path, logger, scheme=scheme, hash_func=hash_func, overwrite=False)
             
         elif mode == "w+":
-            return cls.Writer(path, logger, overwrite = True)
+            return cls.Writer(path, logger, scheme=scheme, hash_func=hash_func, overwrite = True)
             
         else:
-            logger.critical(f"")
+            logger.critical()
             raise ValueError()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self):
-        del self
+    def __contains__(self, file_hash):
+        return file_hash in self.table.index
 
     def abspath(self, file_hash):
-        if file_hash not in self:
-            return ""
+        return os.path.abspath(os.path.join(self.path, "files", file_hash))
 
-        return os.path.abspath(f"{self.path}{os.sep}files{os.sep}{file_hash}")
+    def match_scheme(self, dictionary):
+        if self.scheme is None:
+            return True
 
-    def __contains__(self, file_hash):
-        return file_hash in self.table
+        .
 
-    class Reader(FileManager):
-        def __init__(self, path, logger):
-            """
-            # Si path n'existe pas
-    			logger.critical
-    			raise FileNotFound
-    		
-    		# Si path ne contient pas hashes_table.json
-    			logger.critical
-    			raise FileNotFound
-    		
-    		# Si path ne contient pas files/
-    			logger.critical
-    			raise FileNotFound
-    		
-    		# Si hashes_table.csv est pas chargeable en DF
-    			logger.critical
-    			raise l'erreur levée par pd
-    		
-    		# Fait les vérifications de types et valeur nécéssaires sur les données de table
-    			logger.error()
-    			ajoute la hash dans la liste à retirer
-    		
-    		# vérifie que sous `files/` chaque fichier est nommé d'après son hash
-    			logger.error()
-    			ajoute le hash dans la liste à retirer
-    		
-    		# vérifie la correspondance entre les entrées de `files/` et de la table
-    			logger.error()
-    			ajoute les hashs concernés dans la liste à retirer
-    		
-    		# Filtre la table en retirant les hashs buggés
-            """
+    class Reader(FileManager):        
+        def __init__(self, path, logger, scheme=None, hash_func=hash_sha256):
+            if not os.path.exists(path):
+                logger.critical()
+                raise FileNotFoundError()
+
+            hashes_table_path = os.path.join(path, "hashes_table.csv")
+            files_path = os.path.join(path, "files")
+            
+            if not os.path.exists(hashes_table_path):
+                logger.critical()
+                raise FileNotFoundError()
+
+            if not os.path.exists(files_path):
+                logger.critical()
+                raise FileNotFoundError()
+
+            try:
+                dataframe = pandas.read_csv(csv_path)
+                logger.debug()
+                
+            except Exception as exception:
+                logger.critical()
+                raise exception
+
+            logger.info()
+
             self.path = path
-            self.table = table
+            self.table = dataframe
+            
+        def __post_init__(self):
+            wrong_files = self.check()
+
+            if self.wrong_files:
+                logger.warning()
+                self.pop(wrong_files)
         
         def __iter__(self):
             for file_hash, file_metadata in self.table:
                 yield file_hash, file_metadata.to_dict()
 
+        def check(self):
+            # Vérifie que chaque entrée dans la table match les scheme
+            # Vérifie que chaque fichier est nommé d'après son 
+
+        def pop(self, index_to_drop):
+            self.table.drop(index_to_drop)
+        
         def open(self, file_hash, binary=False, encoding="utf-8", newline=None, buffering=1):
-            if (file_path := self.abspath(file_hash)) is None:
+            file_path = self.abspath(file_hash)
+            
+            if file_hash not in self:
                 logger.error()
                 return BytesIO() if binary else StringIO()
-        
-            if binary:
-                return open(file_path, "rb", buffering=buffering)
-                
-            else:
-                return open(file_path, "r", encoding=encoding, newline=newline, buffering=buffering)
 
-    class Writer(FileManager):
-        def __init__(self, path, logger, overwrite = False):
+            try: 
+                if binary:
+                    return open(file_path, "rb", buffering=buffering)
+                    
+                else:
+                    return open(file_path, "r", encoding=encoding, newline=newline, buffering=buffering)
+
+            except Exception as exception:
+                logger.error()
+                return BytesIO() if binary else StringIO()
+
+    class Writer(FileManager):        
+        def __init__(self, path, logger, scheme=None, hash_func=hash_sha256, overwrite = False):
     		if os.path.exists(path):
     			if overwrite:
                     logger.warning()
@@ -106,13 +118,23 @@ class FileManager:
     		self.table = pandas.DataFrame()
     		self.logger = logger
 
-        def write(content, binary=False, encoding="utf-8", newline=None, buffering=-1):
+        def __exit__(self):
+            self.logger.info()
+            self.table.to_csv(os.path.join(self.path, "hashes_table.csv"))
+        
+        def write(content, metadata, binary=False, encoding="utf-8", newline=None, buffering=-1):
             file_hash = hash_sha256(content, binary=binary, encoding=encoding)
 
             if file_hash in self:
                 logger.error()
                 return False
 
+            if self.check_meta(metadata):
+                self.table.loc[file_hash] = metadata
+
+            else:
+                return False
+            
             try:
                 if binary:
                     with open(self.abspath(file_hash), "wb", buffering=buffering) as file:
