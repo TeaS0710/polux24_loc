@@ -63,7 +63,7 @@ def hash_file(path, chunk_size=8192):
     return hash_func.hexdigest()
 
 
-def hash_str(string, encoding="utf-8"):
+def hash_data(data, binary=False, encoding="utf-8"):
     """
     Computes the hash of a string.
     
@@ -89,7 +89,11 @@ def hash_str(string, encoding="utf-8"):
     
     # Computes the SHA-256 hash of the string directly, without needing the `.update` method.
     # This approach does not require the initialization of the hashing function (unlike in `hash_file`, see line `hash_func = sha256()` above).
-    return sha256(string.encode(encoding)).hexdigest()
+    if binary:
+        return sha256(data).hexdigest()
+        
+    else:
+        return sha256(data.encode(encoding)).hexdigest()
 
 
 def create_logger(name, path, verbose=False, level=logging.INFO):
