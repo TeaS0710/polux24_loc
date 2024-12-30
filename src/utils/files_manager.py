@@ -5,9 +5,26 @@ import pandas
 
 class FileManager:
     pass
+    @classmethod 
+    def __new__(cls, path, mode, logger):
+        if mode == "r":
+            return cls.Reader(path, logger)
+        elif mode == "w":
+            return cls.Writer(path, logger, overwrite=False)
+        elif mode == "w+":
+            return cls.Writer(path, logger, overwrite = True)
+        else:
+            logger.critical(f"Nike ta mere")
+            raise ValueError 
 
+    class Reader(File_manager):
+        Def __init__(self, path, logger):
+            pass
 
-@class manager 
+    class Writer(File_manager):
+        Def __init__(self, path, logger, overwrite = False):
+            pass
+
 
 
 def create_logger(name, path, verbose=False, level=logging.INFO):
