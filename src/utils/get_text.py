@@ -107,15 +107,15 @@ def get_text(path, logger):
     if extractor is None:
         logger.error(f"Cannot run extraction on '{path}': no extractor found for '{ext}' files.")
         text = ""
+    else:
+        #execute l'extraction avec une gestion d'erreur
+        try:
+            logger.debug(f"Running extraction on '{path}'.")
+            text = extractor(path)
 
-    # Run extraction with error handling
-    try:
-        logger.debug(f"Running extraction on '{path}'.")
-        text = extractor(path)
-
-    except Exception as exception:
-        logger.error(f"Extraction of '{path}' failed: '{exception}'.")
-        text = ""
+        except Exception as exception:
+            logger.error(f"Extraction of '{path}' failed: '{exception}'.")
+            text = ""
 
     # Log success if text is extracted
     if text:
@@ -129,7 +129,7 @@ def get_text(path, logger):
     return text
 
 # Adds extractor table to `get_text`
-get_text.extractors = {
+    get_text.extractors = {
     ".html": __html_text_extractor,
     ".pdf": __pdf_text_extractor
 }
