@@ -17,9 +17,11 @@ def extract_texts(output, source, logger):
 
 def main():
   logger = create_logger("text", "../cache/test.log", verbose=True, base_level=logging.DEBUG)
+  source = FileManager("../data/source", "r", source_scheme, logger)
+  
   with FileManager("../output/test1", "w+", output_scheme, logger) as output:
-    with FileManager("../data/source", "r", source_scheme, logger) as source:
-      extract_texts(output, source, logger)
+    extract_texts(output, source, logger)
+    
   return 0
 
 
