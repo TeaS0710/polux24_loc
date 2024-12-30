@@ -1,29 +1,116 @@
+from io import BytesIO, StringIO
 import logging
 import os
 import pandas
 
 
 class FileManager:
+    @staticmethod
+    def fake_stream(*args, **kwargs):
+        mode = open_kwargs.get("mode", open_args[0] if open_args else "r")
+
+        if "b" in mode:
+            return BytesIO(*args, **kwargs)
+
+        else:
+            return StringIO(*args, **kwargs)
+    
     @classmethod 
     def __new__(cls, path, mode, logger):
         if mode == "r":
             return cls.Reader(path, logger)
+            
         elif mode == "w":
             return cls.Writer(path, logger, overwrite=False)
+            
         elif mode == "w+":
             return cls.Writer(path, logger, overwrite = True)
+            
         else:
-            logger.critical(f"Nike ta mere")
-            raise ValueError 
+            logger.critical(f"")
+            raise ValueError()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        del self
+
+    def abspath(self, file_hash):
+        if file_hash not in self:
+            return ""
+
+        return os.path.abspath(f"{self.path}{os.sep}files{os.sep}{file_hash}")
+
+    def __contains__(self, file_hash):
+        return file_hash in self.table
 
     class Reader(FileManager):
-        Def __init__(self, path, logger):
+        def __init__(self, path, logger):
+            """
+            # Si path n'existe pas
+    			logger.critical
+    			raise FileNotFound
+    		
+    		# Si path ne contient pas hashes_table.json
+    			logger.critical
+    			raise FileNotFound
+    		
+    		# Si path ne contient pas files/
+    			logger.critical
+    			raise FileNotFound
+    		
+    		# Si hashes_table.csv est pas chargeable en DF
+    			logger.critical
+    			raise l'erreur levée par pd
+    		
+    		# Fait les vérifications de types et valeur nécéssaires sur les données de table
+    			logger.error()
+    			ajoute la hash dans la liste à retirer
+    		
+    		# vérifie que sous `files/` chaque fichier est nommé d'après son hash
+    			logger.error()
+    			ajoute le hash dans la liste à retirer
+    		
+    		# vérifie la correspondance entre les entrées de `files/` et de la table
+    			logger.error()
+    			ajoute les hashs concernés dans la liste à retirer
+    		
+    		# Filtre la table en retirant les hashs buggés
+            """
+            self.path = path
+            self.table = table
+
+        """
+        Itère sur file_hash, file_meta in instance
+        """
+        
+        def __iter__(self):
             pass
+
+        def __next__(self):
+            pass
+                      
+        def open(self, file_hash, encoding="utf-8", newline="\n", buffering=1):
+            if (file_path := self.abspath(file_hash)) is None:
+                logger.error()
+                return StringIO()
+
+            return open(file_path, "r", encoding=encoding, newline=newline, buffering=buffering)
+
+        def openb(self, file_hash, buffering=-1):
+            if (file_path := self.abspath(file_hash)) is None:
+                logger.error()
+                return BytesIO()
+
+            return open(file_path, "rb", buffering=buffering)
 
     class Writer(FileManager):
-        Def __init__(self, path, logger, overwrite = False):
+        def __init__(self, path, logger, overwrite = False):
             pass
 
+        def write(self, content, data):
+            pass
 
 
 def create_logger(name, path, verbose=False, level=logging.INFO):
@@ -87,5 +174,4 @@ def create_logger(name, path, verbose=False, level=logging.INFO):
     logger.info(f"Logger '{name}' initialized for logging the execution of script '{__file__}'")
 
     # Returns the configured logger instance
-    return logger      
-        
+    return logger
