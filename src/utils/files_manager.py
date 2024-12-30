@@ -2,6 +2,7 @@ from io import BytesIO, StringIO
 import logging
 import os
 import pandas
+import shutil
 
 
 class FileManager:
@@ -75,7 +76,7 @@ class FileManager:
             for file_hash, file_metadata in self.table:
                 yield file_hash, file_metadata.to_dict()
 
-        def open(self, file_hash, binary=False, encoding="utf-8", newline="\n", buffering=1):
+        def open(self, file_hash, binary=False, encoding="utf-8", newline=None, buffering=1):
             if (file_path := self.abspath(file_hash)) is None:
                 logger.error()
                 return BytesIO() if binary else StringIO()
@@ -88,26 +89,44 @@ class FileManager:
 
     class Writer(FileManager):
         def __init__(self, path, logger, overwrite = False):
-            """
-            # Si not overwrite et path existe:
-			logger.critical()
-			raise PermissionError()
-			
-    		# Si overwrite et path existe:
-    			logger.warning()
-    			suppression du path
-		
-    		# Création
-    			creation de path
-    			creation du sous dir files/
-    			logger.info()
-            """
-            self.path = path
-            self.logger = logger
-            self.
+    		if os.path.exists(path):
+    			if overwrite:
+                    logger.warning()
+                    shutil.rmtree(path)
+                    
+                else:
+        			logger.critical()
+        			raise PermissionError()
+    
+            os.makedirs(path)
+            os.makedirs(os.path.join(path, "files"))
+            logger.info()
+        
+    		self.path = path
+    		self.table = pandas.DataFrame()
+    		self.logger = logger
 
-        def write(self, content, data):
-            pass
+        def write(content, binary=False, encoding="utf-8", newline=None, buffering=-1):
+            file_hash = hash_sha256(content, binary=binary, encoding=encoding)
+
+            if file_hash in self:
+                logger.error()
+                return False
+
+            try:
+                if binary:
+                    with open(self.abspath(file_hash), "wb", buffering=buffering) as file:
+                        file.write(content)
+                        return True
+                    
+                else:
+                    with open(self.abspath(file_hash), "w", encoding=encoding, newline=newline, buffering=buffering) as file:
+                        file.write(content)
+                        return True
+                    
+            except Exception as exception:
+                self.logger.error()
+                return False
 
 
 def create_logger(name, path, verbose=False, level=logging.INFO):
