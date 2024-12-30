@@ -1,4 +1,6 @@
 from io import BytesIO, StringIO
+from logging import Logger
+
 import os
 import pandas
 import shutil
@@ -8,6 +10,30 @@ from .misc import hash_data, hash_file
 
 class FileManager:
     def __new__(cls, path, mode, scheme, logger):
+        if not isinstance(logger, Logger):
+            raise TypeError()
+        
+        if not isinstance(path, str):
+            logger.critical()
+            raise TypeError()
+
+        if not isinstance(mode, str):
+            logger.critical()
+            raise TypeError()
+
+        if not isinstance(scheme, dict):
+            logger.critical()
+            raise TypeError()
+
+        for key, value in scheme.items():
+            if not isinstance(key, str):
+                logger.critical()
+                raise TypeError()
+
+            if not isinstance(value, callable):
+                logger.critical()
+                raise TypeError()
+        
         if mode == "r":
             return FileManagerReader(path, scheme, logger)
             
