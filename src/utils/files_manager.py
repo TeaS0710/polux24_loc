@@ -4,7 +4,6 @@ import pandas
 
 
 class FileManager:
-    pass
     @classmethod 
     def __new__(cls, path, mode, logger):
         if mode == "r":
@@ -17,11 +16,11 @@ class FileManager:
             logger.critical(f"Nike ta mere")
             raise ValueError 
 
-    class Reader(File_manager):
+    class Reader(FileManager):
         Def __init__(self, path, logger):
             pass
 
-    class Writer(File_manager):
+    class Writer(FileManager):
         Def __init__(self, path, logger, overwrite = False):
             pass
 
