@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import math
 import urllib.request as urllib2
 from io import BytesIO
@@ -34,14 +35,33 @@ def get_image_cluster(lat_deg, lon_deg, delta_lat, delta_long, zoom):
                 tile = Image.open(BytesIO(imgstr))
                 cluster.paste(tile, box=((xtile - xmin) * 256, (ytile - ymin) * 256))
             except Exception as e: 
-                print(f"va te faire foutre fucking user: {e}")
+                print(f"Couldn't download image: {e}")
 
     return cluster
-    
+
+def read_coordinates_from_csv(fichier_csv, colonne_latitude, colonne_longitude):
+    try:
+        data = pd.read_csv(fichier_csv)
+        if colonne_latitude not in data.columns or colonne_longitude not in data.columns:
+            raise ValueError("hahaha")
+        return list(zip(data[colonne_latitude], data[colonne_longitude]))
+    except Exception as e:
+        print(f"Erreur : {e}")
+        return []
+
 def main():
-    a = get_image_cluster(38.5, -77.04, 0.02, 0.05, 13)
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
-    plt.imshow(np.asarray(a))
-    plt.axis('off')
-    plt.show()
+    fichier_csv = 'points.csv'
+    colonne_latitude = 'latitude'
+    colonne_longitude = 'longitude'
+    coordinates = read_coordinates_from_csv(fichier_csv, colonne_latitude, colonne_longitude)
+
+    if coordinates:
+        lat, lon = coordinates[0]
+        delta_lat, delta_long = 0.02, 0.05
+        zoom = 13
+        a = get_image_cluster(lat, lon, delta_lat, delta_long, zoom)
+        fig = plt.figure()
+        fig.patch.set_facecolor('white')
+        plt.imshow(np.asarray(a))
+        plt.axis('off')
+        plt.show()
