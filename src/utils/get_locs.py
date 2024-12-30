@@ -1,15 +1,18 @@
 from spacy import load as spacy_load
 from stanza import Pipeline as stanza_load
 from flair.data import Sentence
-from flair.models.SequenceTagger import flair_load
+from flair.models import SequenceTagger as flair_load
 
 
+#chargement des modèles directement
+spacy.cli.download("fr_dep_news_trf")
+stanza.download("fr")
 
 def __ner_flair(text):
     sentence = Sentence(text)
     __ner_flair.model.predict(sentence)
     return [
-        {"start": ent.start_position, "end": ent.end_position, "location": ent.text}
+        {"text": ent.text, "start": ent.start_position, "end": ent.end_position}
         for ent in sentence.get_spans("ner")
         if ent.get_label("ner").value == "LOC"
     ]
@@ -30,7 +33,7 @@ __ner_spacy.model = spacy_load("fr_dep_news_trf")
 def __ner_stanza(text):
     return [
         {"text": ent.text, "start": ent.start_char, "end": ent.end_char}
-        for ent in model(text).ents
+        for ent in __ner_stanza.model(text).ents
         if ent.type == "LOC"
     ]
 
