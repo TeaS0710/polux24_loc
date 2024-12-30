@@ -9,11 +9,11 @@ from .misc import hash_data, hash_file
 
 
 class FileManager:
-    def __new__(cls, path, mode, scheme, logger):
+    def __new__(cls, root_path, mode, scheme, logger):
         if not isinstance(logger, Logger):
             raise TypeError()
         
-        if not isinstance(path, str):
+        if not isinstance(root_path, str):
             logger.critical()
             raise TypeError()
 
@@ -35,13 +35,13 @@ class FileManager:
                 raise TypeError()
         
         if mode == "r":
-            return FileManagerReader(path, scheme, logger)
+            return FileManagerReader(root_path, scheme, logger)
             
         elif mode == "w":
-            return FileManagerWriter(path, scheme, logger, overwrite=False)
+            return FileManagerWriter(root_path, scheme, logger, overwrite=False)
             
         elif mode == "w+":
-            return FileManagerWriter(path, scheme, logger, overwrite=True)
+            return FileManagerWriter(root_path, scheme, logger, overwrite=True)
             
         else:
             logger.critical()
@@ -55,17 +55,17 @@ class FileManager:
 
 
 class FileManagerReader(FileManager):        
-    def __init__(self, path, scheme, logger):
+    def __init__(self, root_path, scheme, logger):
         logger.debug()
-        if not os.path.exists(path):
+        if not os.path.exists(root_path):
             logger.critical()
             raise FileNotFoundError()
 
-        table_path = os.path.join(path, "table.csv")
-        files_path = os.path.join(path, "files")
+        table_path = os.path.join(root_path, "table.csv")
+        files_path = os.path.join(root_path, "files")
 
         logger.debug()
-        if not os.path.exists(hashes_table_path):
+        if not os.path.exists(table_path):
             logger.critical()
             raise FileNotFoundError()
 
@@ -76,7 +76,7 @@ class FileManagerReader(FileManager):
 
         try:
             logger.debug()
-            dataframe = pandas.read_csv(csv_path, dtype=str)
+            dataframe = pandas.read_csv(table_path, dtype=str)
             
         except Exception as exception:
             logger.critical()
@@ -171,20 +171,20 @@ class FileManagerReader(FileManager):
 
 
 class FileManagerWriter(FileManager):
-    def __init__(self, path, logger, scheme, overwrite = False):
-        if os.path.exists(path):
+    def __init__(self, root_path, scheme, logger, overwrite = False):
+        if os.path.exists(root_path):
             if overwrite:
                 logger.warning()
-                shutil.rmtree(path)
+                shutil.rmtree(root_path)
                 
             else:
                 logger.critical()
                 raise PermissionError()
 
-        files_path = os.path.join(path, "files")
-        table_path = os.path.join(path, "table.csv")
+        files_path = os.path.join(root_path, "files")
+        table_path = os.path.join(root_path, "table.csv")
         
-        os.makedirs(path)
+        os.makedirs(root_path)
         os.makedirs(files_path)
         logger.info()
     
