@@ -11,6 +11,6 @@ user% python3 doc/generate_doc.py
 ```
 
 ## Credits
-[Camille MONNOT](https://github.com/Rber085), [Adrien VERGNE](https://github.com/TeaS0710) & dir. [Caroline KOUDOURO-PARFAIT](https://github.com/carolinekoudoroparfait).
+[Camille MONNOT](https://github.com/Rber085) & [Adrien VERGNE](https://github.com/TeaS0710), dir. [Caroline KOUDOURO-PARFAIT](https://github.com/carolinekoudoroparfait) & [Gaël Lejeune](https://github.com/rundimeco).
 
 2024, [MIT Licence](https://opensource.org/license/mit).
