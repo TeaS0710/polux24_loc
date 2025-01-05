@@ -1,0 +1,2 @@
+spacy.cli.download("fr_dep_news_trf")
+stanza.download("fr")
