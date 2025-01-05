@@ -1,50 +1,33 @@
-from spacy import load as spacy_load
-from stanza import Pipeline as stanza_load
+from spacy import load
+from stanza import Pipeline
 from flair.data import Sentence
-from flair.models import SequenceTagger as flair_load
 
 
-#chargement des modèles directement
-spacy.cli.download("fr_dep_news_trf")
-stanza.download("fr")
+FLAIR = SequenceTagger("ner")
+SPACY = load("fr_dep_news_trf")
+STANZA = Pipeline
 
-def __ner_flair(text):
+def get_locs(text):
+    locs = {}
+
     sentence = Sentence(text)
-    __ner_flair.model.predict(sentence)
-    return [
-        {"text": ent.text, "start": ent.start_position, "end": ent.end_position}
+    FLAIR.predict(sentence)
+    locs["flair"] = [
+        [ent.start_position, ent.end_position]
         for ent in sentence.get_spans("ner")
         if ent.get_label("ner").value == "LOC"
     ]
 
-__ner_flair.model = flair_load("ner")
-
-
-def __ner_spacy(text):
-    return [
-        {"text": ent.text, "start": ent.start_char, "end": ent.end_char}
-        for ent in __ner_spacy.model(text).ents
+    locs["spacy"] = [
+        [ent.start_char, ent.end_char]
+        for ent in SPACY(text).ents
         if ent.label_ == "LOC"
     ]
 
-__ner_spacy.model = spacy_load("fr_dep_news_trf")
-
-
-def __ner_stanza(text):
-    return [
-        {"text": ent.text, "start": ent.start_char, "end": ent.end_char}
-        for ent in __ner_stanza.model(text).ents
+    locs["stanza"] = [
+        [ent.start_char, ent.end_char]
+        for ent in STANZA(text).ents
         if ent.type == "LOC"
     ]
-
-__ner_stanza.model = stanza_load("fr", processors="tokenize,ner")
-
-
-def get_locs(text):
-    return {motor_name: motor(text) for motor_name, motor in get_locs.extractors.items()}
     
-get_locs.extractors = {
-    "flair": __ner_flair,
-    "spacy": __ner_spacy,
-    "stanza": __ner_stanza
-}
+    return locs
