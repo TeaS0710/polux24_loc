@@ -5,7 +5,7 @@ from flair.data import Sentence
 
 FLAIR = SequenceTagger("ner")
 SPACY = load("fr_dep_news_trf")
-STANZA = Pipeline
+STANZA = Pipeline("fr")  
 
 def get_locs(text):
     locs = {}
