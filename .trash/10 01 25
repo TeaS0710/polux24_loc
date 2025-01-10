@@ -1,0 +1,18 @@
+def compter_nombre_de_lignes(nom_fichier):
+    try:
+        with open(nom_fichier, 'r', encoding='utf-8') as fichier:
+            nombre_de_lignes = sum(1 for _ in fichier)
+        return nombre_de_lignes
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier '{nom_fichier}' n'a pas été trouvé.")
+        return -1
+    except Exception as e:
+        print(f"Une erreur est survenue : {e}")
+        return -1
+
+# Exemple d'utilisation
+if __name__ == "__main__":
+    nom_du_fichier = 'exemple.txt'  # Remplacez par le chemin de votre fichier
+    nombre = compter_nombre_de_lignes(nom_du_fichier)
+    if nombre != -1:
+        print(f"Le fichier '{nom_du_fichier}' contient {nombre} lignes.")
