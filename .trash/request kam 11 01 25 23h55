@@ -1,0 +1,80 @@
+from spacy import load
+from stanza import Pipeline
+from flair.data import Sentence
+from flair.models import SequenceTagger
+
+from PyPDF2 import PdfReader
+from trafilatura import extract
+
+from utils import safecall
+
+# Initialisation des modèles NER
+FLAIR = SequenceTagger("ner")
+SPACY = load("fr_dep_news_trf")
+STANZA = Pipeline("fr")  
+
+def ___ner_flair(text):
+    """Extraction des entités LOC avec Flair."""
+    sentence = Sentence(text)
+    FLAIR.predict(sentence)
+    return [
+        [ent.start_position, ent.end_position]
+        for ent in sentence.get_spans("ner")
+        if ent.get_label("ner").value == "LOC"
+    ]
+
+def ___ner_spacy(text):
+    """Extraction des entités LOC avec spaCy."""
+    return [
+        [ent.start_char, ent.end_char]
+        for ent in SPACY(text).ents
+        if ent.label_ == "LOC"
+    ]
+
+def ___ner_stanza(text):
+    """Extraction des entités LOC avec Stanza."""
+    return [
+        [ent.start_char, ent.end_char]
+        for ent in STANZA(text).ents
+        if ent.type == "LOC"
+    ]
+
+def ___get_locs(text):
+    """Agrégation des entités LOC provenant de différents outils NER."""
+    return {
+        "flair": ___ner_flair(text),
+        "spacy": ___ner_spacy(text),
+        "stanza": ___ner_stanza(text),
+    }
+
+@safecall
+def ___fetch_html(path):
+    """Extraction du texte à partir d'un fichier HTML."""
+    with open(path, "r", encoding="utf-8") as file:
+        return extract(file.read())
+
+@safecall
+def ___fetch_pdf(path):
+    """Extraction du texte à partir d'un fichier PDF."""
+    text_fragments = [page.extract_text().strip() for page in PdfReader(path).pages]
+    text = "\n".join(text_fragments).strip()
+    return text if text else None
+
+@safecall
+def ___fetch_txt(path):
+    """Extraction du texte à partir d'un fichier TXT."""
+    with open(path, "r", encoding="utf-8") as file:
+        text = file.read()
+    return text if text else None
+
+@safecall
+def ___fetch_text(path, ext):
+    """Sélection de la méthode d'extraction en fonction de l'extension du fichier."""
+    if ext.upper() == "HTML":
+        return ___fetch_html(path)
+    elif ext.upper() == "PDF":
+        return ___fetch_pdf(path)
+    elif ext.upper() == "TXT":
+        return ___fetch_txt(path)
+    else:
+        raise NotImplementedError(f"Unsupported file extension: '{ext}'.")
