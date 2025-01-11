@@ -1,0 +1,60 @@
+: JSON ENTRÉE :
+
+{"id": doc_1_id, "author": doc_1_author, "url": doc_1_url, "type": doc_1_type, "text": doc_1_text, "locs": doc_1_locs, "size": doc_1_size}
+{"id": doc_2_id, "author": doc_2_author, "url": doc_2_url, "type": doc_2_type, "text": doc_2_text, "locs": doc_2_locs, "size": doc_2_size}
+{"id": doc_3_id, "author": doc_3_author, "url": doc_3_url, "type": doc_3_type, "text": doc_3_text, "locs": doc_3_locs, "size": doc_3_size}
+{"id": doc_4_id, "author": doc_4_author, "url": doc_4_url, "type": doc_4_type, "text": doc_4_text, "locs": doc_4_locs, "size": doc_4_size}
+...
+{"id": doc_n_id, "author": doc_n_author, "url": doc_n_url, "type": doc_n_type, "text": doc_n_text, "locs": doc_n_locs, "size": doc_n_size}
+
+
+: TYPES :
+
+"id" = str (hash du document)
+"author" = str (RN, LR, LFI, ...)
+"url" = str (url du document)
+"type" = str (HTML, PDF, TXT)
+"text" = str (texte du document) -> peut etre vide (ie "")
+"locs" = {str: [[int, int]]} (EN LOC du document) -> peut etre vide (ie {})
+"size" = int (taille du ficher original en bytes) -> peut etre vide (ie 0)
+
+~~~
+: STRUCTURE LOCS : 
+
+"locs": {
+	"model_1": [[loc_1_start, loc_1_end], [loc_1_start, loc_1_end], ..., [loc_n_start, loc_n_end]],
+	"model_2": [[loc_1_start, loc_1_end], [loc_1_start, loc_1_end], ..., [loc_n_start, loc_n_end]],
+	...
+	"model_n": [[loc_1_start, loc_1_end], [loc_1_start, loc_1_end], ..., [loc_n_start, loc_n_end]]
+}
+
+~~~
+
+: STRUCTURE SORTIE JSON (JSON COUNTS) :
+
+[ volumes.json ]
+doc_author:
+	doc_type: {
+		doc_id: [number_of_char, number_of_token, weight_in_bytes],
+		doc_id: [number_of_char, number_of_token, weight_in_bytes],
+		doc_id: [number_of_char, number_of_token, weight_in_bytes],
+	}
+
+[ tokens_lexicon.json ]
+doc_author:
+	doc_type: {
+		doc_id : {token: count...}
+		...
+	}
+
+[ locs_lexicon.json ]
+doc_author:
+	doc_type: {
+		doc_id: {
+			model: {loc: count...}
+			...
+		}
+		...
+	}
+
+
