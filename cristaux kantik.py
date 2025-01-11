@@ -1,30 +1,22 @@
 import json
 import os
 from collections import defaultdict, Counter
-import nltk
-from nltk.tokenize import word_tokenize
-
-# Assurez-vous d'avoir téléchargé les ressources nécessaires de nltk
-nltk.download('punkt')
 
 def process_input_file(input_file_path):
-    """
-    Traite le fichier d'entrée JSON et génère les dictionnaires nécessaires
-    pour volumes.json, tokens_lexicon.json et locs_lexicon.json.
-    """
+    
     # Dictionnaires pour les fichiers de sortie
     volumes = defaultdict(lambda: defaultdict(dict))
     tokens_lexicon = defaultdict(lambda: defaultdict(dict))
     locs_lexicon = defaultdict(lambda: defaultdict(dict))
 
     with open(input_file_path, 'r', encoding='utf-8') as infile:
-        for line in infile:
+        for line_number, line in enumerate(infile, 1):
             if not line.strip():
                 continue  # Ignorer les lignes vides
             try:
                 doc = json.loads(line)
             except json.JSONDecodeError as e:
-                print(f"Erreur de décodage JSON: {e}")
+                print(f"Erreur de décodage JSON à la ligne {line_number}: {e}")
                 continue
 
             doc_id = doc.get("id", "")
@@ -36,7 +28,7 @@ def process_input_file(input_file_path):
 
             # Calculs pour volumes.json
             number_of_char = len(text)
-            tokens = word_tokenize(text)
+            tokens = text.split()  # Utilisation de split() pour la tokenisation
             number_of_token = len(tokens)
             weight_in_bytes = size
 
@@ -55,27 +47,31 @@ def process_input_file(input_file_path):
             for model, loc_list in locs.items():
                 model_counts = Counter()
                 for loc_range in loc_list:
+                    if not isinstance(loc_range, list) or len(loc_range) != 2:
+                        print(f"Format de loc_range invalide dans le document {doc_id}, modèle {model}: {loc_range}")
+                        continue
                     start, end = loc_range
                     # S'assurer que les indices sont valides
+                    if not isinstance(start, int) or not isinstance(end, int):
+                        print(f"Indices non entiers dans le document {doc_id}, modèle {model}: start={start}, end={end}")
+                        continue
                     if start < 0 or end > len(text) or start >= end:
+                        print(f"Indices hors limites dans le document {doc_id}, modèle {model}: start={start}, end={end}")
                         continue
                     loc_text = text[start:end]
                     model_counts[loc_text] += 1
-                locs_lexicon[author][doc_type][doc_id] = dict(model_counts)
+                if model_counts:
+                    locs_lexicon[author][doc_type][doc_id][model] = dict(model_counts)
 
     return volumes, tokens_lexicon, locs_lexicon
 
 def write_json(output_data, output_file_path):
-    """
-    Écrit les données dans un fichier JSON avec une indentation pour la lisibilité.
-    """
+    
     with open(output_file_path, 'w', encoding='utf-8') as outfile:
         json.dump(output_data, outfile, indent=4, ensure_ascii=False)
 
 def main(input_file_path, output_directory):
-    """
-    Fonction principale qui traite le fichier d'entrée et génère les fichiers de sortie.
-    """
+    
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
