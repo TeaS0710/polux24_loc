@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=67"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polux-pipeline"
+version = "0.1.0"
+description = "Modernized pipeline for POLUX location extraction"
+authors = [{ name = "POLUX Team" }]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.scripts]
+polux-pipeline = "polux_pipeline.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
